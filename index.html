@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <title>wasm example</title>
+    </head>
+    <body>
+        <svg width="400" height="400" id="base">
+            <path id="basePath" />
+        </svg>
+        
+        <svg width="400" height="400" id="modified">
+            <path id="modifiedPath" />
+        </svg>
+
+        <script type="text/javascript">
+            let wasm = null;
+            Module = {}
+            const path1 = [200,200,200,100,100,100,200,200];
+        
+            const base = document.getElementById('base');
+            const modified = document.getElementById('modified')
+
+            const basePath = document.getElementById('basePath');
+            const modifiedPath = document.getElementById('modifiedPath')
+            
+            const coords2pathString = (x0,y0,x1,y1,x2,y2,x3,y3) => 
+                `M${x0},${y0} C${x1},${y1} ${x2},${y2} ${x3},${y3}`
+            
+            basePath.setAttribute('d',coords2pathString(...path1));
+
+            // const res = await fetch("chip8.wasm");
+            // const buffer = await res.arrayBuffer();
+            // const module = await WebAssembly.compile(buffer);
+            // const instance = await WebAssembly.instantiate(module);
+            // const exports = instance.exports;
+            // const programMemory = new Uint8Array(
+            //   exports.memory.buffer,
+            //   exports.get_memory(),
+            //   8
+            // );
+            
+            // for(let i = 0 ; i < 8;i++){
+            //     programMemory[i] = path1[i]
+            // }
+            // console.log(programMemory);
+            // exports.leftb(0.2);
+            // console.log(programMemory);
+
+            
+            
+            
+
+            fetch('add.wasm')
+                .then(response=> response.arrayBuffer())
+                .then(buffer => WebAssembly.instantiate(buffer,Module))
+                .then(results=>{
+
+                    wasm = results.instance.exports
+                    let mem = new Uint8Array(wasm.memory.buffer, wasm.get_memory(),8)
+
+                    for(let i = 0 ; i < 8 ; i++){
+                        mem[i] = path1[i]
+                    }
+                    wasm.leftb(0.2);
+                    mem[2]= 3
+                    path2 = Array.from(mem);
+                    console.log(path1)
+                    console.log(path2)
+                    modifiedPath.setAttribute('d',coords2pathString(...path2));                    
+                })
+        </script>
+    
+    </body>
+</html>
