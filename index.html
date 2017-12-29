@@ -31,23 +31,17 @@
                     let memoryOut = new Uint8Array(wasm.memory.buffer, wasm.get_memory_out(),1024)
 
                     var pathString = basePath.getAttribute('d');
-                    console.log(pathString);
-                    console.log(pathString.length);
 
                     for (var i = 0; i < pathString.length; i++){  
                         memoryIn[i] = pathString.charCodeAt(i);
                     }
-                    console.log(memoryIn);
                     wasm.leftb(0.2);
-                    console.log(memoryOut);
                     var pathString2 = "";
                     let index = 0;
                     while (memoryOut[index] > 0) {
-                        console.log(String.fromCharCode(memoryOut[index]));
                         pathString2 += String.fromCharCode(memoryOut[index]);
                         index++;
                     }
-                    console.log(pathString2);
 
                     modifiedPath.setAttribute('d',pathString2);                    
                 })
