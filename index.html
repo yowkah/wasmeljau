@@ -21,7 +21,7 @@
             const basePath = document.getElementById('basePath');
             const modifiedPath = document.getElementById('modifiedPath')
 
-            fetch('add.wasm')
+            fetch('main.wasm')
                 .then(response=> response.arrayBuffer())
                 .then(buffer => WebAssembly.instantiate(buffer,Module))
                 .then(results=>{
