@@ -14,7 +14,7 @@ enum PathPart {
     Line(Vec<(f64, f64)>),
     Curve(Vec<(f64, f64)>),
 }
-
+ 
 impl PathPart {
     fn length(&self) -> f64{
         match self {

@@ -11,39 +11,65 @@
             <path id="modifiedPath" stroke="blue" stroke-width="5" fill="none" />
         </svg>
 
+        <input type="text" id="percentage" />
+        <input type="button" id="execute" value="bereken" />
+        <input type="button" id="animate" value="animeren" />
+        
         <script type="text/javascript">
             let wasm = null;
             Module = {}
         
+            let animating = false;
+            let progress = 0;
+            
             const base = document.getElementById('base');
             const modified = document.getElementById('modified')
 
             const basePath = document.getElementById('basePath');
             const modifiedPath = document.getElementById('modifiedPath')
 
-            fetch('main.wasm')
+            document.getElementById("execute").addEventListener("click", () => {
+                let base = basePath.getAttribute('d')
+                let percentage = document.getElementById("percentage").value
+                modifiedPath.setAttribute('d',leftb( base ,percentage))
+            })
+
+            document.getElementById('animate').addEventListener("click", () =>{
+                animating = true;
+            })
+
+            setInterval(() => {
+                let base = basePath.getAttribute('d')
+                
+                if(animating && progress < 1) {
+                    progress += 1 / 5 / 60
+                    progress = progress > 1 ? 1 : progress
+                    modifiedPath.setAttribute('d', leftb(base, progress))
+                }else{
+                    animating = false;
+                    progress = 0;
+                }
+            },1000/60)
+            let leftb = function(pathString, percentage){
+                console.log("leftb not loaded yet")
+            }
+            fetch('main.min.wasm')
                 .then(response=> response.arrayBuffer())
                 .then(buffer => WebAssembly.instantiate(buffer,Module))
                 .then(results=>{
 
                     wasm = results.instance.exports
-                    let memoryIn = new Uint8Array(wasm.memory.buffer, wasm.get_memory_in(),1024)
-                    let memoryOut = new Uint8Array(wasm.memory.buffer, wasm.get_memory_out(),1024)
-
-                    var pathString = basePath.getAttribute('d');
-
-                    for (var i = 0; i < pathString.length; i++){  
-                        memoryIn[i] = pathString.charCodeAt(i);
+                    
+                    leftb = (pathString,percentage) => {
+                        let memoryIn = new Uint8Array(wasm.memory.buffer, wasm.get_memory_in(), 1024)
+                        pathString.split('').forEach((val,i) => memoryIn[i] = val.charCodeAt(0))
+                        wasm.leftb(percentage);
+                        let memoryOut = new Uint8Array(wasm.memory.buffer, wasm.get_memory_out(), 1024)
+                        return  Array.from(memoryOut)
+                            .splice(0,memoryOut.indexOf(0)-1)
+                            .map(v => String.fromCharCode(v))
+                            .join('')
                     }
-                    wasm.leftb(0.2);
-                    var pathString2 = "";
-                    let index = 0;
-                    while (memoryOut[index] > 0) {
-                        pathString2 += String.fromCharCode(memoryOut[index]);
-                        index++;
-                    }
-
-                    modifiedPath.setAttribute('d',pathString2);                    
                 })
         </script>
     
